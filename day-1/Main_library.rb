@@ -1,96 +1,93 @@
 books=[]
-def show_spanish_menu
-    puts "=== Sistema de Gestión de Biblioteca ==="
-    puts "1. Agregar un libro"
-    puts "2. Listar libros"
-    puts "3. Buscar un libro"
-    puts "4. Actualizar un libro"
-    puts "5. Eliminar un libro"
-    puts "6. Salir"
-    print "Presione Enter para volver al menú principal"
-    gets
-end
+
 def show_menu
     puts "=== Libary Management System === "
-    puts "0. Show menu in spanish"
     puts "1. Add a book"
     puts "2. List books"
-    puts "3. Search for a book"
-    puts "4. Update a book"
-    puts "5. Delete a book"
-    puts "6. Exit"
-    puts "7. List all books"
-    puts "8. Browse by genre"
+    puts "3. List all books"
+    puts "4. Search for a book"
+    puts "5. Update a book"
+    puts "6. Delete a book"
+    puts "7. Dev stats"
+    puts "8. Books between years"
     puts "9. Book summary"
+    puts "10. Exit"
 end
-def addbooks(books)
+
+def add_books(books)
     print "Enter Book Title:"
-    name=gets.chomp
+    name = gets.chomp
+
     print "enter author name:"
-    author=gets.chomp
+    author = gets.chomp
+
     print "Enter year of publication:"
-    year=gets.chomp.to_i
+    year = gets.chomp.to_i
+
     print "Enter the Genre of the book:"
-    gen=gets.chomp
-    if(gen=="")
-        gen="Uncategorized"
+    gen = gets.chomp
+
+    if(gen == "")
+        gen = "Uncategorized"
     end
     books.push({name:name,author:author,year:year,genre:gen})
 end
-def listbooks(books)
-    books.first(3).each{ |b|
-        puts "Name :" + b[:name] + ", Author :" + b[:author] + ", Year of publication :" + b[:year].to_s + ", Genre :" + b[:genre]
-    }
+
+def list_books(books)
+    display_book(books.first(3))
 end
-def searchbook(books)
+
+def search_book(books)
     print "Enter book Title to search:"
-    title=gets.chomp
-    f=false
-    books.each{ |b|
-        if b[:name]== title
-            puts "Name :" + b[:name] + ", Author :" + b[:author] + ", Year of publication :" + b[:year].to_s + ", Genre :" + b[:genre]
-            f=true
-        end      
-    }
-    if !f
+    title = gets.chomp
+
+    book = books.find{ |b| b[:name].downcase == title.downcase }
+    if !book
         puts "Book not found!"
+    else 
+        puts "Book Found!"
+        display_book([book])
     end
 end
-def updatebook(books)
+
+def update_book(books)
     print "Enter title to update:"
-    title=gets.chomp
-    f=false
-    books.each{ |b|
-        if b[:name] == title
-            print "Enter new title:"
-            title1=gets.chomp
-            print "Enter new author:"
-            author1=gets.chomp
-            print "Enter new year of publication:"
-            year1=gets.chomp.to_i
-            print "Enter new genre:"
-            genre1=gets.chomp
-            b[:name] = title1
-            b[:author] = author1
-            b[:year] = year1
-            if(genre1=="")
-                genre1="Uncategorized"
-            end
-            b[:genre] = genre1
-            puts "Book updated successfully!"
-            f=true
-        end    
-    }
-    if(!f)
+    title = gets.chomp
+
+    book = books.find{ |b| b[:name].downcase == title.downcase }
+    if book
+        print "Enter new title:"
+        title1 = gets.chomp
+
+        print "Enter new author:"
+        author1 = gets.chomp
+
+        print "Enter new year of publication:"
+        year1 = gets.chomp.to_i
+
+        print "Enter new genre:"
+        genre1 = gets.chomp
+
+        book[:name] = title1
+        book[:author] = author1
+        book[:year] = year1
+        if(genre1 == "")
+            genre1 = "Uncategorized"
+        end
+        book[:genre] = genre1
+        puts "Book updated successfully!"
+    else    
         puts "Book not found!"
     end
 end
-def deletebook(books)
+
+def delete_book(books)
     print "enter title to delete:"
-    titl=gets.chomp
-    len=books.length
+    titl = gets.chomp
+
+    len = books.length
     books.reject!{ |b|
-        b[:name]==titl
+        b[:name] == titl
     }
     if len == books.length
         puts "Book not found!"
@@ -98,287 +95,90 @@ def deletebook(books)
         puts "Book deleted successfully!"
     end
 end
-def listallbooks(books)
-    books.each{ |b|
-        puts "Name :" + b[:name] + ", Author :" + b[:author] + ", Year of publication :" + b[:year].to_s + ", Genre :" + b[:genre]
-    }
+
+def list_allbooks(books)
+    display_book(books)
 end
-def browsebygenre(books)
-    print "enter the genre:"
-    genn=gets.chomp.downcase
-    f=false
-    books.each{ |b|
-        if b[:genre].downcase == genn
-            puts "Name :" + b[:name] + ", Author :" + b[:author] + ", Year of publication :" + b[:year].to_s + ", Genre :" + b[:genre]
-            f=true
-        end
-    }
-    if !f
-        puts "No books found in that genre."
-    end
-end
+
 def book_summary(books)
     if books.empty?
         puts "Library is empty."
     else
-        min=books[0][:year]
-        bz=books[0]
-        books.each{|b|
-            if b[:year] < min
-                min = b[:year]
-                bz = b
-            end
-        }
-        puts "No of Books in the library:" + books.length.to_s + ", Last added book Title:" + books.last[:name] + ", Earliest book year:" + bz[:year].to_s + ", Earliest book Title:" + bz[:name]
+        oldest_book = books.min_by{ |b| b[:year] }
+        puts "No of Books in the library: #{books.length}"
+        puts "Last added book Title: #{books.last[:name]}"
+        puts "oldest book year: #{oldest_book[:year]}"
+        puts "oldest book Title: #{oldest_book[:name]}"
     end
+end
+
+def dev_stats(books)
+    total_books = books.count
+    puts "total number of books in the library: #{total_books}"
+
+    books_after_2000 = books.count{ |b| b[:year] > 2000 }
+    puts "Number of books published after 2000: #{books_after_2000}"
+
+    authors = books.map{ |b| b[:author] }.uniq
+    puts "=== authors in the library==="
+    authors.each{ |auth| puts auth }
+end
+
+def books_between_years(books)
+    print "Enter start year:"
+    start_year = gets.chomp.to_i
+
+    print "Enter end year:"
+    end_year = gets.chomp.to_i
+
+    if(end_year < start_year)
+        puts "Invalid range"
+        return 
+    end
+
+    filtered_books = books.select{ |b| b[:year] >= start_year && b[:year] <= end_year}
+    if(filtered_books.empty?)
+        puts "No books found in the given range"
+    else
+        display_book(filtered_books.sort_by{ |b| b[:year] })
+    end
+end
+
+def display_book(books)
+    books.each{ |b|
+        puts "Name : #{b[:name]}, Author : #{b[:author]}, Year of publication : #{b[:year]}, Genre : #{b[:genre]}"
+    }
 end
 
 loop do
     show_menu
     print "Enter your choice:"
     ch=gets.chomp.to_i
+
     case ch
-    when 0
-        show_spanish_menu
     when 1
-        addbooks(books)
+        add_books(books)
     when 2
-        listbooks(books)
+        list_books(books)
     when 3
-        searchbook(books)
-    when 4
-        updatebook(books)
+        list_allbooks(books)
+    when 4        
+        search_book(books)
     when 5
-        deletebook(books)
+        update_book(books)
     when 6
-        puts "Goodbye!"
-        break
+        delete_book(books)
     when 7
-        listallbooks(books)
+        dev_stats(books)
     when 8
-        browsebygenre(books)
+        books_between_years(books)
     when 9
         book_summary(books)
+    when 10
+        puts "Goodbye!"
+        break
     else
         puts "Invalid choice try again!"
     end
     puts "\n"
 end
-
-=begin
------------OUTPUT--------------------
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:0
-=== Sistema de Gestión de Biblioteca ===
-1. Agregar un libro
-2. Listar libros
-3. Buscar un libro
-4. Actualizar un libro
-5. Eliminar un libro
-6. Salir
-Presione Enter para volver al menú principal
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:1
-Enter Book Title:atomic habits
-enter author name:james clear
-Enter year of publication:2018
-Enter the Genre of the book:personal development
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:1
-Enter Book Title:the alchemist
-enter author name:paulo coelho
-Enter year of publication:1988
-Enter the Genre of the book:adventure
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:1
-Enter Book Title:educated
-enter author name:tara westover
-Enter year of publication:2018
-Enter the Genre of the book:biography
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:1
-Enter Book Title:pride and prejudice
-enter author name:jane austen
-Enter year of publication:1813
-Enter the Genre of the book:classic
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:2
-Name :atomic habits, Author :james clear, Year of publication :2018, Genre :personal development
-Name :the alchemist, Author :paulo coelho, Year of publication :1988, Genre :adventure
-Name :educated, Author :tara westover, Year of publication :2018, Genre :biography
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:3
-Enter book Title to search:atomic habits
-Name :atomic habits, Author :james clear, Year of publication :2018, Genre :personal development
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:4
-Enter title to update:pride and prejudice
-Enter new title:pride
-Enter new author:jane austen
-Enter new year of publication:1813
-Enter new genre:      
-Book updated successfully!
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:7
-Name :atomic habits, Author :james clear, Year of publication :2018, Genre :personal development
-Name :the alchemist, Author :paulo coelho, Year of publication :1988, Genre :adventure
-Name :educated, Author :tara westover, Year of publication :2018, Genre :biography
-Name :pride, Author :jane austen, Year of publication :1813, Genre :Uncategorized
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:5
-enter title to delete:pride
-Book deleted successfully!
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:8
-enter the genre:biography
-Name :educated, Author :tara westover, Year of publication :2018, Genre :biography
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:9
-No of Books in the library:3, Last added book Title:educated, Earliest book year:1988, Earliest book Title:the alchemist
-
-=== Libary Management System === 
-0. Show menu in spanish
-1. Add a book
-2. List books
-3. Search for a book
-4. Update a book
-5. Delete a book
-6. Exit
-7. List all books
-8. Browse by genre
-9. Book summary
-Enter your choice:6
-Goodbye!
-
-=end
