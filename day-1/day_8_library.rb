@@ -17,9 +17,23 @@ module Searchable
     end
 end
 
+module Exportable
+    def to_csv_row
+        col = [title,author,year,genre].map{ |col|
+            if col.to_s.include?(",")
+                "\"#{col}\""
+            else
+                col
+            end
+        }
+        col.join(",")
+    end
+end
+
 class Book
     include Displayable
     include Comparable
+    include Exportable
     attr_accessor :title, :author, :year, :genre
     
     def  initialize(title,author,year,genre)
@@ -227,6 +241,15 @@ class Library
             puts "Book not found!"
         end
     end
+    
+    def export_books(title)
+        book=find_by_title(title)
+        if book
+            puts book.to_csv_row
+        else
+            puts "Book not found"
+        end
+    end
 end
 
 def show_menu
@@ -242,7 +265,8 @@ def show_menu
     puts "9. Book summary"
     puts "10. Update book title"
     puts "11. Show Stats"
-    puts "12. Exit"
+    puts "12. Export book to clipboard format"
+    puts "13. Exit"
 end
 
 library=Library.new
@@ -297,6 +321,11 @@ loop do
         puts "Books by genre : #{s[:by_genre]}"
         puts "Average year: #{s[:average_year]}"
     when 12
+        print "Enter the title of the book:"
+        title=gets.chomp        
+        next if !library.validate_input(title, "Book Title")
+        library.export_books(title)
+    when 13
         puts "Goodbye!"
         break
     else
