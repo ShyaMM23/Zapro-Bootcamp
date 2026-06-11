@@ -1,4 +1,5 @@
 require 'csv'
+require 'fileutils'
 SAVE_FILE = "books.csv"
 
 class BookNotFoundError < StandardError
@@ -313,6 +314,13 @@ def show_menu
     puts "15. Exit"
 end
 
+def backup_library
+    if File.exist?(SAVE_FILE)
+        FileUtils.cp(SAVE_FILE,"backup_books.csv")
+        puts "Backup Created: backup_books.csv"
+    end
+end
+
 def save_library(library)
     CSV.open(SAVE_FILE, "w") do |csv|
         csv << ["title", "author", "year", "genre", "type", "url", "duration_minutes"]
@@ -348,7 +356,8 @@ end
 library=Library.new
 load_library(library)
 
-at_exit do
+at_exit do 
+  backup_library
   save_library(library)
 end
 
