@@ -19,7 +19,7 @@ end
 
 module Searchable
     def find_by_title(query)
-        book = @books.find{ |b| b.title.downcase.include?(query.downcase)}
+        book = @books.find{ |b| b.title.downcase == query.downcase }
         raise BookNotFoundError, "Book not found" if book.nil?
         return book
     end
@@ -73,6 +73,7 @@ class Book
 end
 
 class DigitalBook < Book
+    attr_accessor :url
     def initialize(title,author,year,genre,url)
         super(title,author,year,genre)
         @url=url
@@ -83,6 +84,23 @@ class DigitalBook < Book
         puts "-" * 20
     end
 end
+
+class AudioBook < Book
+    attr_accessor :duration_minutes
+    def initialize(title,author,year,genre,duration_minutes)
+        super(title,author,year,genre)
+        raise InvalidInputError, "Duration must be a positive integer" if duration_minutes <= 0
+        @duration_minutes = duration_minutes
+    end
+    def display
+        super
+        d_hours = @duration_minutes / 60
+        d_min = @duration_minutes % 60
+        puts "Duration: #{d_hours}h #{d_min}m"
+        puts "-"*20
+    end
+end
+
 
 class Library
     include Searchable
@@ -103,6 +121,11 @@ class Library
     def add_digital_book(title,author,year,genre,url)
         @books.push(DigitalBook.new(title, author, year, genre, url))
         puts "Digital book added successfully"
+    end
+
+    def add_audio_book(title, author, year, genre, duration)
+        @books.push(AudioBook.new(title, author, year, genre, duration))
+        puts "Audiobook added successfully"
     end
 
     def add(title,author,year,genre)
@@ -154,7 +177,7 @@ class Library
     def update_book_title
         print "Enter the current title of the book to update:"
         current_title=gets.chomp
-        return if !validate_input(current_title, "New Title")
+        return if !validate_input(current_title, "Current Title")
 
         book=find_by_title(current_title)
         puts "Enter the new title of the book:"
@@ -279,11 +302,12 @@ def show_menu
     puts "7. Dev stats"
     puts "8. Books between years"
     puts "9. Add a digital Book"
-    puts "10. Update book title"
+    puts "10. Add a audio Book"
     puts "11. Show Stats"
     puts "12. Export book to clipboard format"
     puts "13. Book Summary"
-    puts "14. Exit"
+    puts "14. Update book title"
+    puts "15. Exit"
 end
 
 library=Library.new
@@ -351,7 +375,25 @@ begin
             library.add_digital_book(name, author, year, gen,url)
             
         when 10 
-            library.update_book_title
+            print "Enter Book Title:"
+            name = gets.chomp
+            next if !library.validate_input(name, "Book Title")
+
+            print "Enter author name:"
+            author = gets.chomp
+            next if !library.validate_input(author, "Author name")
+
+            print "Enter year of publication:"
+            year = validate_year(gets.chomp)
+            
+            print "Enter Genre:"
+            genre = gets.chomp
+            next if !library.validate_input(genre, "Genre")
+
+            print "Enter duration in minutes:"
+            duration = gets.chomp.to_i
+
+            library.add_audio_book(name, author, year, genre, duration)
         when 11
             s = library.stats
             puts "Total books : #{s[:total]}"
@@ -365,15 +407,17 @@ begin
         when 13
             library.book_summary
         when 14
+            library.update_book_title
+        when 15
             puts "Goodbye!"
             break
         else
             puts "Invalid choice try again!"
         end
         puts "\n"
-        rescue BookNotFoundError => e
-            puts e.message
-        rescue InvalidInputError => e
-            puts e.message
     end
+    rescue BookNotFoundError => e
+        puts e.message
+    rescue InvalidInputError => e
+        puts e.message
 end
